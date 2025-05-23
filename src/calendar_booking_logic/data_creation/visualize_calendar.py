@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 import matplotlib.pyplot as plt
 
+
 def visualize_workday_schedule(file_path: str, start_date: datetime, num_days: int):
     tz = pytz.timezone("US/Pacific")
     work_start = 9
@@ -55,3 +56,11 @@ def visualize_workday_schedule(file_path: str, start_date: datetime, num_days: i
     plt.grid(axis='x', linestyle='--', alpha=0.5)
     plt.tight_layout()
     plt.show()
+
+
+if __name__ == "__main__":
+    name = "Luis"
+    start_date = datetime.today()
+    visualize_workday_schedule(f"./calendars/agent_{name}.ics",
+                               start_date=start_date,
+                               num_days=7)

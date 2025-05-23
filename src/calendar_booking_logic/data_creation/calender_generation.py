@@ -51,13 +51,10 @@ def create_randomized_week_calendar(file_path: str, start_date: datetime, user_n
         f.writelines(calendar.serialize_iter())
 
 
-
-
-
 if __name__ == "__main__":
-    start_date = datetime(2025, 5, 23)
+    start_date = datetime.today()
+    agents = ["Alex", "Cynthia", "Daniel", "Luis"]
 
-    calendar_path = "calendars/agent_alice.ics"
-    create_randomized_week_calendar(calendar_path, start_date, "Alice")
-    print(f"Generated calendar for Alice at: {calendar_path}")
-
+    for name in agents:
+        calendar_path = f"calendars/agent_{name}.ics"
+        create_randomized_week_calendar(calendar_path, start_date, name)
