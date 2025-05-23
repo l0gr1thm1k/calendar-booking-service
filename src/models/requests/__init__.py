@@ -1,4 +1,4 @@
-from models.requests.requests_tokenize_text import TokenizeTextRequest
+from models.requests.requests_booking import BookAppointmentRequest
 
 
-__all__ = ('TokenizeTextRequest')
+__all__ = ('BookAppointmentRequest')

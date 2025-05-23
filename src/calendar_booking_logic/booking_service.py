@@ -60,7 +60,7 @@ class BookingService:
             create_randomized_week_calendar(calendar_path, start_date, name)
 
     def book_appointment(self, agent_id: str, start_time: datetime, duration_minutes: int,
-                         title: str = "Appointment") -> None:
+                         title: str = "Appointment") -> dict:
         """Books an appointment at the requested time, regardless of conflicts. Always returns True."""
         if agent_id not in self.calendars:
             raise ValueError(f"No calendar loaded for agent {agent_id}")
@@ -68,10 +68,15 @@ class BookingService:
         end_time = pdt_start_time + timedelta(minutes=duration_minutes)
 
         calendar = self.calendars[agent_id]["calendar"]
+        event_response = {"conflict_info": "No Conflicts",
+                          "booking_info": ""}
 
         for event in calendar.events:
             if pdt_start_time < event.end.datetime and end_time > event.begin.datetime:
-                logger.info(f"Conflict detected with event: {event.name} at {event.begin}–{event.end}")
+                conflict_message = f"Conflict detected with event: {event.name} at {event.begin}–{event.end}"
+                logger.info(conflict_message)
+                event_response['conflict_info'] = conflict_message
+
                 break
 
         new_event = Event()
@@ -81,7 +86,12 @@ class BookingService:
         calendar.events.add(new_event)
 
         self.save_calendar_to_file(agent_id)
-        logger.info(f"New Calendar event '{title}' for agent '{agent_id}' created.")
+        event_info_message = f"New Calendar event '{title}' for agent '{agent_id}' created."
+        logger.info(event_info_message)
+        event_response['booking_info'] = event_info_message
+
+        return event_response
+
 
     def save_calendar_to_file(self, agent_id):
         file_path = self.calendars[agent_id]["filepath"]
@@ -102,7 +112,7 @@ if __name__ == "__main__":
     title = "Test Meeting"
 
     # Book appointment
-    service.book_appointment(agent_id=agent_id,
+    print(service.book_appointment(agent_id=agent_id,
                              start_time=start_time,
                              duration_minutes=duration_minutes,
-                             title=title)
+                             title=title))
