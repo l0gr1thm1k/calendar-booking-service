@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  calendar-booking-service:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    ports:
+      - "7100:7100"
