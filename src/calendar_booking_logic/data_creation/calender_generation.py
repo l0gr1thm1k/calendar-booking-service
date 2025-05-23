@@ -6,6 +6,9 @@ from ics import Calendar, Event
 from datetime import datetime, timedelta
 import pytz
 
+from pathlib import Path
+from src.calendar_booking_logic.common.constants import DATA_DIR
+
 
 def create_randomized_week_calendar(file_path: str, start_date: datetime, user_name: str):
     tz = pytz.timezone("US/Pacific")
@@ -57,5 +60,5 @@ if __name__ == "__main__":
     agents = ["Alex", "Cynthia", "Daniel", "Luis"]
 
     for name in agents:
-        calendar_path = f"calendars/agent_{name}.ics"
+        calendar_path = str(Path(DATA_DIR) / f"agent_{name}.ics")
         create_randomized_week_calendar(calendar_path, start_date, name)

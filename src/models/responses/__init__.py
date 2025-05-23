@@ -1,3 +1,3 @@
-from models.responses.responses_tokenize_text import TokenizeTextResponse
+from models.responses.responses_booking import BookAppointmentResponse
 
-__all__ = ('TokenizeTextResponse')
+__all__ = ('BookAppointmentResponse')

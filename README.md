@@ -14,7 +14,7 @@ Busy time from 12:00 AM to 9:00 AM and from 5:00 PM to 11:59 PM to reflect typic
 
 Remaining hours within the 9–5 window are considered available.
 
-Calendars are saved under the `calendars/` directory. A visualization function, `visualize_workday_schedule`, renders a color-coded matplotlib chart for quick analysis of busy vs. free time blocks.
+Calendars are saved under the `src/calendar_booking_logic/data/` directory (note the directory is created on the fly when the service starts). A visualization function, `visualize_workday_schedule`, renders a color-coded matplotlib chart for quick analysis of busy vs. free time blocks.
 
 ### b. Purpose of Test Data
 This test data is designed to simulate realistic and diverse agent schedules, enabling end-to-end validation of key features, including:

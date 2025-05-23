@@ -1,4 +1,6 @@
-
-EXAMPLE_TEXT = "Pierre Vinken, 61 years old, will join the board as a nonexecutive director Nov. 29"
-EXAMPLE_TOKENIZED_TEXT = ['Pierre', 'Vinken,', '61', 'years', 'old,', 'will', 'join', 'the', 'board', 'as', 'a', 
-                          'nonexecutive', 'director', 'Nov.', '29']
+EXAMPLE_AGENT = "Luis"
+EXAMPLE_START_TIME = "2025-05-28 10:30 AM"
+EXAMPLE_DURATION = 60
+EXAMPLE_TITLE = "Calendar Booking Service Demo"
+EXAMPLE_BOOKING_INFO = f"New Calendar event '{EXAMPLE_TITLE}' for agent '{EXAMPLE_AGENT}' created."
+EXAMPLE_CONFLICT_INFO = f"Conflict detected with event: {EXAMPLE_AGENT} - Busy Block at 2025-05-25T22:00:00+00:00–2025-05-25T22:30:00+00:00"
