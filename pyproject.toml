@@ -2,7 +2,7 @@
 name = "REST API Template"
 version = "0.1.0"
 description = ""
-authors = ["Daniel Smith <daniel.smith@wizards.com>"]
+authors = ["Daniel Smith <daniel.smith@oxon.com>"]
 readme = "README.md"
 package-mode = false
 
@@ -13,6 +13,9 @@ fastapi = "^0.115.4"
 structlog = "^24.4.0"
 prometheus-client = "^0.21.0"
 uvicorn = {extras = ["standard"], version = "^0.32.0"}
+ics = "0.7.2"
+pytz = "2025.2"
+matplotlib = "3.10.3"
 
 
 [build-system]

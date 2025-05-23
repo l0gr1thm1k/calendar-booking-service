@@ -3,7 +3,7 @@ from models.requests import TokenizeTextRequest
 from models.responses import TokenizeTextResponse
 from structlog import get_logger
 
-from application_logic.example_application_logic import tokenize_text  
+from src.calendar_booking_logic.example_application_logic import tokenize_text
 from routes.router import CustomRoute
 
 logger = get_logger()
