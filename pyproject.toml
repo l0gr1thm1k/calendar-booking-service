@@ -16,7 +16,10 @@ uvicorn = {extras = ["standard"], version = "^0.32.0"}
 ics = "0.7.2"
 pytz = "2025.2"
 matplotlib = "3.10.3"
-
+langchain-core = "0.3.61"
+langchain = "0.3.25"
+openai = "1.82.0"
+langchain-openai = "0.3.18"
 
 [build-system]
 requires = ["poetry-core"]

@@ -5,3 +5,5 @@
 /src/calendar_booking_logic/data_creation/calendars/
 
 src/calendar_booking_logic/data/
+
+.env
