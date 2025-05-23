@@ -30,9 +30,10 @@ def create_randomized_week_calendar(file_path: str, start_date: datetime, user_n
             event.uid = str(uuid.uuid4())
             calendar.events.add(event)
 
-        # Random 2 hours (4 blocks of 30 minutes) during work hours
+        # Random 0 to 8 hours booked (16 blocks of 30 minutes) during work hours
         work_slots = [9 + 0.5 * i for i in range(16)]  # 16 half-hour slots: 09:00–17:00
-        busy_blocks = random.sample(work_slots, k=4)
+        slots_filled = random.choice([ii for ii in range(1, 15)])  # at least 1 30 min slot
+        busy_blocks = random.sample(work_slots, k=slots_filled)
 
         for hour in busy_blocks:
             hr = int(hour)

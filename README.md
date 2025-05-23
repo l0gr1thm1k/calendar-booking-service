@@ -1,8 +1,35 @@
-# REST API Microservice Template
+# Calendar Booking Service
 
-A boilerplate project for building a REST API microservice. This template provides a simple, scalable foundation for developing RESTful APIs, with built-in features like dependency management, structured logging, and environment-based configuration.
 
-## Features
+## Setup Test Data
+
+### a. Calendar Generation
+This project uses ICS calendar files (.ics) to simulate agent availability. The included helper function create_randomized_week_calendar generates synthetic weekly calendars for individual agents.
+
+Each agent’s calendar is structured as follows:
+
+Busy time from 12:00 AM to 9:00 AM and from 5:00 PM to 11:59 PM to reflect typical non-working hours.
+
+0 to 8 hours of randomly scheduled busy time between 9 AM and 5 PM, simulating variability in daily workloads.
+
+Remaining hours within the 9–5 window are considered available.
+
+Calendars are saved under the `calendars/` directory. A visualization function, `visualize_workday_schedule`, renders a color-coded matplotlib chart for quick analysis of busy vs. free time blocks.
+
+### b. Purpose of Test Data
+This test data is designed to simulate realistic and diverse agent schedules, enabling end-to-end validation of key features, including:
+
+Availability querying: Determining when an agent is free given dynamic and partially booked calendars.
+
+Appointment booking: Verifying that new events are scheduled only during free time.
+
+Workload recommendations: Identifying underutilized days where additional work could be scheduled.
+
+The variation in scheduled hours (from 0 to 8) helps validate edge cases such as fully booked, mostly free, and mixed-availability days.
+
+
+## API Features
+The API itself uses a boilerplate project I wrote for building a REST API microservice. This template provides a simple, scalable foundation for developing RESTful APIs, with built-in features like dependency management, structured logging, and environment-based configuration.
 
 - **FastAPI** framework for handling RESTful endpoints
 - **Poetry** for dependency management
