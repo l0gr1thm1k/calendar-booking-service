@@ -25,13 +25,20 @@ async def stream_text_from_context(
     """
     try:
         async for step in context_manager:
+            if protocol == 'json':
 
-            yield step
+                yield json.dumps({"response": step}) + "\n"
+
+            else:
+
+                yield f"data: {json.dumps({'response': step})}\n\n"
 
     except Exception as e:
         error_event = {"type": "error", "content": str(e)}
 
         yield f"data: {json.dumps(error_event)}\n\n"
+
+
 
 
 async def wrap_sync_iterator(sync_iter):
