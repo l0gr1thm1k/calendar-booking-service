@@ -97,11 +97,12 @@ bash
 │   ├── models                   # API data models
 |   |   ├── requests             # Data models going into the system
 |   |   └── responses            # Data models going out of the system
-│   └── tests                    # Test cases
-|       ├── integration          # Test cases involving external dependencies
-|       └── unit                 # Test cases involving internal dependencies
 ├── Dockerfile                   # Project Dockerfile
 ├── docker-compose.yml           # Project docker compose, can combine multiple services
 ├── pyproject.toml               # Poetry dependency configuration
 └── README.md                    # Project documentation
 ```
+
+## Front End
+
+A streamlit app based off the open source work done here https://github.com/SaiAkhil066/DeepSeek-RAG-Chatbot

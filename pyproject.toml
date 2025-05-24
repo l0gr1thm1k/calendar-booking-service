@@ -20,6 +20,7 @@ langchain-core = "0.3.61"
 langchain = "0.3.25"
 openai = "1.82.0"
 langchain-openai = "0.3.18"
+streamlit = "1.45.1"
 
 [build-system]
 requires = ["poetry-core"]
