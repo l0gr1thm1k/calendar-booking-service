@@ -4,7 +4,10 @@ import json
 import uuid
 
 
-api_url = "http://0.0.0.0:7100/stream?protocol=json"
+#api_url = "http://0.0.0.0:7100/stream?protocol=json"
+api_url = "http://booking-service-api:7100/stream?protocol=json"
+
+
 st.set_page_config(page_title="HouseWhisper Booking Agent", layout="wide")
 
 # Custom CSS
@@ -25,7 +28,6 @@ if "messages" not in st.session_state:
 
 # 💬 Chat Interface
 st.title("🤖 HouseWhisper Booking Agent")
-st.caption("A helpful agent that helps manage your calendar")
 
 # Display messages
 for message in st.session_state.messages:

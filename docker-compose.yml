@@ -1,9 +1,25 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  calendar-booking-service:
+  booking-service-api:
     build:
-        context: .
-        dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile
+    container_name: booking_api
     ports:
       - "7100:7100"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: booking_frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - booking-service-api
+
