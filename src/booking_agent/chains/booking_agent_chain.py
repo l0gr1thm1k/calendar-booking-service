@@ -7,7 +7,12 @@ from booking_agent.chains.response_generator import get_streaming_response_chain
 from booking_agent.chains.summarize_question import get_summarize_chain
 from booking_agent.chains.booking_chain import get_booking_chain
 from booking_agent.chains.availability_chain import get_availability_chain
+from booking_agent.chains.heads_down_chain import get_heads_down_chain
 from booking_agent.logging_utils import get_logger
+
+from calendar_booking_logic.common.utils import to_pdt
+from datetime import datetime
+from collections import defaultdict
 
 
 logger = get_logger(__name__)
@@ -35,6 +40,7 @@ def get_booking_agent_chain() -> RunnableLambda:
 
     booking_chain = get_booking_chain()
     availability_chain = get_availability_chain()
+    heads_down_chain = get_heads_down_chain()
 
     async def _run(inputs: dict) -> dict:
         message = inputs["message"]
@@ -79,7 +85,7 @@ def get_booking_agent_chain() -> RunnableLambda:
             chains_to_run["availability"] = availability_chain.ainvoke({"message": message})
 
         if 'heads down' in intents:
-            pass
+            chains_to_run["heads down"] = heads_down_chain.ainvoke({"message": message})
 
         context = {
         }
@@ -92,11 +98,15 @@ def get_booking_agent_chain() -> RunnableLambda:
             booking_context = ''
 
         if 'availability' in context:
-            availability_context = [str(slot) for slot in context['availability']['available_slots']]
+            # availability_context = [str(slot) for slot in context['availability']['available_slots']]
+            availability_context = format_available_slots(context['availability']['available_slots'])
         else:
             availability_context = ''
 
-        context['heads_down_context'] = ""
+        if 'heads down' in context:
+            heads_down_context = "/n".join([context['heads down']['booking_info'], context['heads down']['conflict_info']])
+        else:
+            heads_down_context = ''
 
         # Step 4: Prepare final generation input
         response_input = {
@@ -106,7 +116,7 @@ def get_booking_agent_chain() -> RunnableLambda:
             "intents": intents,
             "booking_context": booking_context,
             "availability_context": availability_context,
-            "heads_down_context": context['heads_down_context'],
+            "heads_down_context": heads_down_context,
         }
 
         async for chunk in response_chain.astream(response_input):
@@ -117,8 +127,30 @@ def get_booking_agent_chain() -> RunnableLambda:
     return RunnableLambda(_run)
 
 
+def format_available_slots(slots):
+    grouped_by_date = defaultdict(list)
+
+    for slot in slots:
+        start_dt = datetime.fromisoformat(slot["start"])
+        end_dt = datetime.fromisoformat(slot["end"])
+        local_start = to_pdt(start_dt)
+        local_end = to_pdt(end_dt)
+
+        date_str = local_start.strftime("%A, %B %d")
+        time_str = f"{local_start.strftime('%-I:%M %p')} – {local_end.strftime('%-I:%M %p')}"
+        grouped_by_date[date_str].append(time_str)
+
+    # Build the response string
+    formatted = []
+    for date, times in grouped_by_date.items():
+        formatted.append(f"Available time slots on {date}:")
+        for t in times:
+            formatted.append(f"- {t}")
+    return "\n".join(formatted)
+
+
 if __name__ == '__main__':
     chain = get_booking_agent_chain()
-    payload = {"message": "What are 3 time slots I'm available for tomorrow? if I have an opening schedule me a 15 min meeting to review offers",
+    payload = {"message": "Schedule me focus time on Tuesday",
                "messages": []}
     resp = asyncio.run(chain.ainvoke(payload))
