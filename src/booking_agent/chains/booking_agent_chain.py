@@ -3,7 +3,7 @@ import asyncio
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from booking_agent.chains.intent import get_intent_chain
 from booking_agent.chains.misbehavior import get_misbehavior_chain
-from booking_agent.chains.response_generator import get_response_chain
+from booking_agent.chains.response_generator import get_response_chain, get_streaming_response_chain
 from booking_agent.chains.summarize_question import get_summarize_chain
 from booking_agent.chains.booking_chain import get_booking_chain
 from booking_agent.logging_utils import get_logger
@@ -30,7 +30,7 @@ def get_booking_agent_chain() -> RunnableLambda:
     intent_chain = get_intent_chain()
     misbehavior_chain = get_misbehavior_chain()
     summarize_chain = get_summarize_chain()
-    response_chain = get_response_chain()
+    response_chain = get_streaming_response_chain() # get_response_chain()
 
     booking_chain = get_booking_chain()
 
@@ -54,14 +54,14 @@ def get_booking_agent_chain() -> RunnableLambda:
         summary = results["summary"]
 
         if misbehavior == "unsafe":
-            return {
+            yield {
                 "type": "misbehavior_block",
                 "error": "Input flagged as unsafe."
             }
 
         # Step 2: Short-circuit if off-topic
         if intents == ["off-topic"]:
-            return {
+            yield {
                 "type": "off_topic",
                 "response": "That seems outside the realm of scheduling meetings for you via HouseWhisper. I'm best at helping you manage your schedule"
             }
@@ -99,15 +99,10 @@ def get_booking_agent_chain() -> RunnableLambda:
             "heads_down_context": context['heads_down_context'],
         }
 
-        response_result = await response_chain.ainvoke(response_input)
-
-        return {
-            "type": "assistant_response",
-            "response": response_result["response"],
-            "intents": intents,
-            "chat_history": chat_history,
-            "summary": summary.get('summary', ''),
-        }
+        async for chunk in response_chain.astream(response_input):
+            print(chunk, end='', flush=True)
+            yield chunk
+        print("\n")
 
     return RunnableLambda(_run)
 
@@ -117,4 +112,4 @@ if __name__ == '__main__':
     payload = {"message": "Book me a time to show the Hindley property at 3:25pm tomorrow",
                "messages": []}
     resp = asyncio.run(chain.ainvoke(payload))
-    print(resp['response'])
+    #print(resp['response'])

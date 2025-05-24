@@ -26,14 +26,19 @@ def get_response_chain():
 
 
 def get_streaming_response_chain():
-    prompt = ChatPromptTemplate.from_template(load_prompt("qa_response"))
+    prompt_template_str = load_prompt("response")
+    prompt = ChatPromptTemplate.from_template(prompt_template_str)
+
     llm = get_default_llm(tags=["booking-response"], callbacks=[LLMTracer()], streaming=True)
 
-    # Define input mapping if your inputs aren't flat
+    # Ensure all prompt variables are included
     input_map = RunnableLambda(lambda inputs: {
         "chat_history": inputs.get("chat_history", ""),
         "summary": inputs.get("summary", ""),
         "message": inputs["message"],
+        "booking_context": inputs.get("booking_context", ""),
+        "availability_context": inputs.get("availability_context", ""),
+        "heads_down_context": inputs.get("heads_down_context", ""),
     })
 
     return input_map | prompt | llm | StrOutputParser()
