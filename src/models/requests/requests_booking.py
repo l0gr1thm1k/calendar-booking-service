@@ -42,3 +42,18 @@ class AvailabilityRequest(AsyncAPIModel):
     max_slots: int = Field(5,
                            description="Maximum number of available slots to return",
                            example=EXAMPLE_NUMBER_OF_SLOTS)
+
+
+class HeadsDownRequest(AsyncAPIModel):
+    """
+    Request model for the POST /heads_down endpoint
+    """
+    agent_id: str = Field(...,
+                          description="The agent's name",
+                          example=EXAMPLE_AGENT)
+    start_time: str = Field(...,
+                            description="The start time of the window for scheduling heads down time",
+                            example=EXAMPLE_START_TIME)
+    end_time: str = Field(...,
+                          description="The end time of the window for scheduling heads down time",
+                          example=EXAMPLE_END_TIME)

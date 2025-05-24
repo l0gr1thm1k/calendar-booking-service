@@ -43,3 +43,24 @@ class AvailabilityResponse(BaseModel):
     available_slots: List[AvailabilitySlot] = Field(...,
                                                     description="List of available time slots for the agent",
                                                     example=EXAMPLE_AVAILABLE_SLOTS)
+
+
+class HeadsDownResponse(BaseModel):
+    agent_id: str = Field(...,
+                          description="The agent's name",
+                          example=EXAMPLE_AGENT)
+    day: str = Field(...,
+                     description="The day selected for heads-down focus time (YYYY-MM-DD)",
+                     example="2025-05-25")
+    start: str = Field(...,
+                       description="Start time of the focus block",
+                       example=EXAMPLE_START_TIME)
+    end: str = Field(...,
+                     description="End time of the focus block",
+                     example=EXAMPLE_END_TIME)
+    booking_info: str = Field(...,
+                              description="Details about the Focus Time event booking",
+                              example="Focus Time booked from 09:00 to 15:00 on 2025-05-25 covering 6.0 hours of uninterrupted time.")
+    conflict_info: str = Field(...,
+                               description="Summary of how many other meetings occurred on the selected day or other conflict information",
+                               example="1 other meetings were found on this day.")
