@@ -1,7 +1,13 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 PROMPT_DIR = Path(__file__).parent
+
+
+def today() -> str:
+    return datetime.now().strftime("%Y-%m-%d")
+
 
 def load_prompt(name: str, persona: Optional[str] = None) -> str:
     """
@@ -26,5 +32,9 @@ def load_prompt(name: str, persona: Optional[str] = None) -> str:
             persona = persona_path.read_text().strip()
 
         prompt_string = prompt_string.replace(persona_identifier_string, persona)
+
+    date_identifier_string = "{today}"
+    if date_identifier_string in prompt_string:
+        prompt_string = prompt_string.replace(date_identifier_string, today())
 
     return prompt_string

@@ -63,18 +63,23 @@ def get_booking_agent_chain() -> RunnableLambda:
                 "response": "That seems outside the realm of scheduling meetings for you via HouseWhisper. I'm best at helping you manage your schedule"
             }
 
+        logger.info(f"Intents identified: {intents}")
         # Step 3: Prepare and run context chains
         chains_to_run = {}
         possible_intents = ['book', 'availability', 'heads down']
         if 'book' in intents:
-            pass
+            chains_to_run["book"] = booking_chain.ainvoke({"message": message})
+
         if 'availability' in intents:
             pass
+
         if 'heads down' in intents:
             pass
 
-
-        context = {}
+        context = {
+            "availability_context": "",
+            "heads_down_context": ""
+        }
         if chains_to_run:
             chain_results = await asyncio.gather(*chains_to_run.values())
             context = dict(zip(chains_to_run.keys(), chain_results))
@@ -85,6 +90,9 @@ def get_booking_agent_chain() -> RunnableLambda:
             "message": message,
             "summary": summary,
             "intents": intents,
+            "booking_context": context['booking_context'],
+            "availability_context": context['availability_context'],
+            "heads_down_context": context['heads_down_context'],
         }
 
         response_result = await response_chain.ainvoke(response_input)
@@ -99,3 +107,10 @@ def get_booking_agent_chain() -> RunnableLambda:
 
     return RunnableLambda(_run)
 
+
+if __name__ == '__main__':
+    chain = get_booking_agent_chain()
+    payload = {"message": "Book me a time to show the Hindley property at 3:25pm tomorrow",
+               "messages": []}
+    resp = asyncio.run(chain.ainvoke(payload))
+    print(resp['response'])

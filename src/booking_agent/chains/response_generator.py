@@ -10,16 +10,19 @@ def get_response_chain():
     prompt = load_prompt("response")
     llm = get_default_llm(tags=["booking-response"], callbacks=[LLMTracer()])
 
-    async def _qa(inputs: dict) -> dict:
+    async def _response(inputs: dict) -> dict:
         prompt_text = prompt.format(
             chat_history=inputs.get("chat_history", ""),
             summary=inputs.get("summary", ""),
             message=inputs["message"],
+            booking_context=inputs.get("booking_context", ""),
+            availability_context=inputs.get("availability_context", ""),
+            heads_down_context=inputs.get("heads_down_context", ""),
         )
         result = await llm.ainvoke(prompt_text)
         return {"response": result.content.strip()}
 
-    return RunnableLambda(_qa)
+    return RunnableLambda(_response)
 
 
 def get_streaming_response_chain():
