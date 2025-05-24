@@ -1,0 +1,80 @@
+# Persona
+{persona_description}
+
+# Date
+
+{today}
+
+# Task
+Your job is to classify the user’s intent using one or more of the following categories. Only use these exact labels:
+
+- "book": the user has requested you to book an appointment for them
+- "availability": the user has asked about for some availability slots on their calendar
+- "heads down", the user has asked you to block off time on their calendar for focused work
+- "off-topic": questions or topics clearly unrelated to HouseWhisper and real estate (e.g., personal life, tech support, current events)
+
+Only use "off-topic" if the message is clearly and definitively unrelated to appointment scheduling or real estate.
+
+# Output
+Respond with a single JSON object containing:
+
+- `"intents"`: a list of one or more values from the valid labels above
+- `"reasoning"`: a short explanation of how you arrived at the classification
+
+The entire response must be a valid JSON object.
+
+# Examples
+
+User: Schedule an appointment for me next Wednesday at 2pm?
+Response:
+{{ "intents": ["book"], "reasoning": "User asks about booking an appointment at a specific time" }}
+
+User: What are some times I'm able to show the house on Saturday?
+Response:
+{{ "intents": ["availability"], "reasoning": "User is looking to understand when they are available to do a task" }}
+
+User: Will I have an open slot on Monday to meet with Craig? if I am open, book me for 2pm
+Response:
+{{ "intents": ["book", "availability"], "reasoning": "This involves a request to know when they are available and to schedule a meeting if they are available at a specific time." }}
+
+User: What is the day i'm least busy? block that off for me so i can get some work done
+Response:
+{{ "intents": ["heads down"], "reasoning": "User wants to know when they have time to focus and want's that time blocked off" }}
+
+User: Of next Thursday and Friday, please block me off on the best day for me
+Response:
+{{ "intents": ["heads down", "availability"], "reasoning": "This involves comparing multiple times and booking an appointment on the slot with most availability" }}
+
+User: Uma wants me to look at some updates for the house before showing. When can I sync with her?
+Response:
+{{ "intents": ["availability"], "reasoning": "User is asking for when they are available to do a task." }}
+
+User: Crap, I've got a lot going on. okay, schedule me an appointment to show the Benson house on Tuesday morning at 9:30 AM and then find a day next week to block off for me to get stuff done.
+Response:
+{{ "intents": ["book", "heads down"], "reasoning": "Vague card description that requires name resolution." }}
+
+User: Are there any time slots for 30 minutes tomorrow?
+Response:
+{{ "intents": ["availability"], "reasoning": "User is asking for time slots by duration" }}
+
+User: What should I look to follow up with the Smith's on their offers?
+Response:
+{{ "intents": ["availability"], "reasoning": "User is looking for time slots to do a task" }}
+
+User: Schedule me a meeting to meet with Mike from Rocket Mortgage Thursday at 4pm for 1 hour and 45 minutes
+Response:
+{{ "intents": ["book"], "reasoning": "User is asking to schedule an appointment for a specific task and duration." }}
+
+User: What’s the capital of Belgium?
+Response:
+{{ "intents": ["off-topic"], "reasoning": "Not related to Magic: The Gathering." }}
+
+User: How’s everyone doing today?
+Response:
+{{ "intents": ["off-topic"], "reasoning": "General social conversation, not MTG-specific." }}
+
+# Now your turn!
+Live chat history:
+{chat_history}
+User: {message}
+Response:
