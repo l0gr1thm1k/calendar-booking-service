@@ -5,6 +5,7 @@ from booking_agent.chains.intent import get_intent_chain
 from booking_agent.chains.misbehavior import get_misbehavior_chain
 from booking_agent.chains.response_generator import get_response_chain
 from booking_agent.chains.summarize_question import get_summarize_chain
+from booking_agent.chains.booking_chain import get_booking_chain
 from booking_agent.logging_utils import get_logger
 
 
@@ -30,6 +31,8 @@ def get_booking_agent_chain() -> RunnableLambda:
     misbehavior_chain = get_misbehavior_chain()
     summarize_chain = get_summarize_chain()
     response_chain = get_response_chain()
+
+    booking_chain = get_booking_chain()
 
     async def _run(inputs: dict) -> dict:
         message = inputs["message"]
@@ -77,12 +80,13 @@ def get_booking_agent_chain() -> RunnableLambda:
             pass
 
         context = {
-            "availability_context": "",
-            "heads_down_context": ""
         }
         if chains_to_run:
             chain_results = await asyncio.gather(*chains_to_run.values())
             context = dict(zip(chains_to_run.keys(), chain_results))
+
+        context['availability_context'] = ""
+        context['heads_down_context'] = ""
 
         # Step 4: Prepare final generation input
         response_input = {
@@ -90,7 +94,7 @@ def get_booking_agent_chain() -> RunnableLambda:
             "message": message,
             "summary": summary,
             "intents": intents,
-            "booking_context": context['booking_context'],
+            "booking_context": "/n".join([context['book']['booking_info'], context['book']['conflict_info']]),
             "availability_context": context['availability_context'],
             "heads_down_context": context['heads_down_context'],
         }
