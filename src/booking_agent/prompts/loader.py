@@ -2,6 +2,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from booking_agent.common.constants import DEFAULT_AGENT_IDENTIFIER
+
 PROMPT_DIR = Path(__file__).parent
 
 
@@ -36,5 +38,9 @@ def load_prompt(name: str, persona: Optional[str] = None) -> str:
     date_identifier_string = "{today}"
     if date_identifier_string in prompt_string:
         prompt_string = prompt_string.replace(date_identifier_string, today())
+
+    agent_identifier = "{agent_id}"
+    if agent_identifier in prompt_string:
+        prompt_string = prompt_string.replace(agent_identifier, DEFAULT_AGENT_IDENTIFIER)
 
     return prompt_string

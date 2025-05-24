@@ -3,9 +3,10 @@ import asyncio
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from booking_agent.chains.intent import get_intent_chain
 from booking_agent.chains.misbehavior import get_misbehavior_chain
-from booking_agent.chains.response_generator import get_response_chain, get_streaming_response_chain
+from booking_agent.chains.response_generator import get_streaming_response_chain
 from booking_agent.chains.summarize_question import get_summarize_chain
 from booking_agent.chains.booking_chain import get_booking_chain
+from booking_agent.chains.availability_chain import get_availability_chain
 from booking_agent.logging_utils import get_logger
 
 
@@ -15,11 +16,11 @@ logger = get_logger(__name__)
 def get_booking_agent_chain() -> RunnableLambda:
     """
     1. Check for misbehavior / unsafe input
-    2. Classify the user’s intent: book / availability / heads down
+    2. Classify the user’s intent: book / availability.txt / heads down
     3. If book:
        → Run book appointment
-    4. If availability request:
-       → Run availability
+    4. If availability.txt request:
+       → Run availability.txt
     5. If heads down
        → Block off time on available day
     6. Return combined response
@@ -30,9 +31,10 @@ def get_booking_agent_chain() -> RunnableLambda:
     intent_chain = get_intent_chain()
     misbehavior_chain = get_misbehavior_chain()
     summarize_chain = get_summarize_chain()
-    response_chain = get_streaming_response_chain() # get_response_chain()
+    response_chain = get_streaming_response_chain()
 
     booking_chain = get_booking_chain()
+    availability_chain = get_availability_chain()
 
     async def _run(inputs: dict) -> dict:
         message = inputs["message"]
@@ -69,12 +71,12 @@ def get_booking_agent_chain() -> RunnableLambda:
         logger.info(f"Intents identified: {intents}")
         # Step 3: Prepare and run context chains
         chains_to_run = {}
-        possible_intents = ['book', 'availability', 'heads down']
+        possible_intents = ['book', 'availability.txt', 'heads down']
         if 'book' in intents:
             chains_to_run["book"] = booking_chain.ainvoke({"message": message})
 
         if 'availability' in intents:
-            pass
+            chains_to_run["availability"] = availability_chain.ainvoke({"message": message})
 
         if 'heads down' in intents:
             pass
@@ -84,8 +86,16 @@ def get_booking_agent_chain() -> RunnableLambda:
         if chains_to_run:
             chain_results = await asyncio.gather(*chains_to_run.values())
             context = dict(zip(chains_to_run.keys(), chain_results))
+        if 'book' in context:
+            booking_context = "/n".join([context['book']['booking_info'], context['book']['conflict_info']])
+        else:
+            booking_context = ''
 
-        context['availability_context'] = ""
+        if 'availability' in context:
+            availability_context = [str(slot) for slot in context['availability']['available_slots']]
+        else:
+            availability_context = ''
+
         context['heads_down_context'] = ""
 
         # Step 4: Prepare final generation input
@@ -94,8 +104,8 @@ def get_booking_agent_chain() -> RunnableLambda:
             "message": message,
             "summary": summary,
             "intents": intents,
-            "booking_context": "/n".join([context['book']['booking_info'], context['book']['conflict_info']]),
-            "availability_context": context['availability_context'],
+            "booking_context": booking_context,
+            "availability_context": availability_context,
             "heads_down_context": context['heads_down_context'],
         }
 
@@ -109,7 +119,6 @@ def get_booking_agent_chain() -> RunnableLambda:
 
 if __name__ == '__main__':
     chain = get_booking_agent_chain()
-    payload = {"message": "Book me a time to show the Hindley property at 3:25pm tomorrow",
+    payload = {"message": "What are 3 time slots I'm available for tomorrow? if I have an opening schedule me a 15 min meeting to review offers",
                "messages": []}
     resp = asyncio.run(chain.ainvoke(payload))
-    #print(resp['response'])
