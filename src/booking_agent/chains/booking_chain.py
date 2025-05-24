@@ -3,7 +3,7 @@ from booking_agent.prompts import load_prompt
 from booking_agent.llm.openai_llm import get_default_llm
 from booking_agent.llm_tracing.tracer import LLMTracer
 import json
-import requests
+import httpx
 
 
 def get_booking_chain():
@@ -26,7 +26,7 @@ def get_booking_chain():
                 "conflict_info": ""
             }
 
-        booking_response = book_appointment(agent_name=parsed['agent_name'],
+        booking_response = await book_appointment(agent_name=parsed['agent_name'],
                                             start_time=parsed['start_time'],
                                             duration=parsed['duration_minutes'],
                                             title=parsed['title'],
@@ -36,8 +36,7 @@ def get_booking_chain():
     return RunnableLambda(_book)
 
 
-ex_start_time = "2025-05-28 10:30 AM"
-def book_appointment(agent_name, start_time, title, duration=30) -> dict:
+async def book_appointment(agent_name, start_time, title, duration=30) -> dict:
     payload = {
         "agentId": agent_name,
         "startTime": start_time,
@@ -45,6 +44,9 @@ def book_appointment(agent_name, start_time, title, duration=30) -> dict:
         "title": title
     }
     url = "http://localhost:7100/book_appointment"
-    response = requests.post(url, json=payload)
 
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+
+    response.raise_for_status()
     return response.json()

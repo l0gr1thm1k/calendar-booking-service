@@ -110,16 +110,23 @@ def get_logging_route(application_name: str, log_requests: bool, log_responses: 
                         status_code = 500
                         message = f'Unhandled exception in application: {type(ex).__name__}({ex})'
                     response = generate_error_response({'message': message}, status_code)
+
                 if log_responses:
-                    if response.media_type == 'application/json':
-                        response_data = str(json.loads(response.body))[:MAX_LOG_LENGTH]
-                    else:
-                        if response.body:
-                            response_data = str(response.body)[:MAX_LOG_LENGTH]
-                        else:
-                            response_data = None
+                    response_data = None
+                    try:
+                        if hasattr(response, "body"):
+                            if response.media_type == 'application/json':
+                                response_data = str(json.loads(response.body))[:MAX_LOG_LENGTH]
+                            elif response.body:
+                                response_data = str(response.body)[:MAX_LOG_LENGTH]
+                    except Exception as log_ex:
+                        # Don’t crash logging — just note we couldn’t log it
+                        get_logger().warning("Unable to log response body", error=str(log_ex),
+                                             responseType=type(response).__name__)
+
                     logger.info(f'{application_name} response', statusCode=response.status_code,
                                 applicationResponse=response_data)
+
                 clear_threadlocal()
                 return response
 
