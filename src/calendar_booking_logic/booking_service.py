@@ -92,27 +92,53 @@ class BookingService:
 
         return event_response
 
-
     def save_calendar_to_file(self, agent_id):
         file_path = self.calendars[agent_id]["filepath"]
         calendar = self.calendars[agent_id]["calendar"]
         with open(file_path, "w") as f:
             f.writelines(calendar.serialize_iter())
 
+    def find_available_times(self, agent_id: str, date_range_start: datetime, date_range_end: datetime,
+                             duration_minutes: int, max_slots: int = 5) -> List[Dict]:
+        if agent_id not in self.calendars:
+            raise ValueError(f"No calendar loaded for agent {agent_id}")
 
+        calendar = self.calendars[agent_id]["calendar"]
+        pdt_date_range_start = to_pdt(date_range_start)
+        pdt_date_range_end = to_pdt(date_range_end)
+        slots = []
+        step = timedelta(minutes=30)
+        current = pdt_date_range_start
 
+        # Convert all event ranges to a list of tuples for comparison
+        busy_times = [(event.begin.datetime, event.end.datetime) for event in calendar.events]
 
+        while current + timedelta(minutes=duration_minutes) <= pdt_date_range_end and len(slots) < max_slots:
+            slot_end = current + timedelta(minutes=duration_minutes)
+            conflict = any(start < slot_end and end > current for start, end in busy_times)
+            if not conflict:
+                slots.append({
+                    "start": current.isoformat(),
+                    "end": slot_end.isoformat()
+                })
+            current += step
+
+        logger.info(f"Found {len(slots)} time slots for agent {agent_id}: {slots}")
+
+        return slots
 
 
 if __name__ == "__main__":
     service = BookingService()
     agent_id = "Luis"
-    start_time = datetime(2025, 5, 25, 15, 0)
-    duration_minutes = 60
+    start_time = datetime(2025, 5, 24, 15, 0)
+    end_time = datetime(2025, 5, 28, 17, 30)
+    duration_minutes = 90
     title = "Test Meeting"
 
     # Book appointment
-    print(service.book_appointment(agent_id=agent_id,
-                             start_time=start_time,
-                             duration_minutes=duration_minutes,
-                             title=title))
+    print(service.find_available_times(agent_id=agent_id,
+                                       date_range_start=start_time,
+                                       date_range_end=end_time,
+                                       duration_minutes=duration_minutes,
+                                       max_slots=5))
