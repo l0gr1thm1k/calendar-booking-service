@@ -1,4 +1,4 @@
 from models.responses.responses_agent import ChatResponse
-from models.responses.responses_booking import BookAppointmentResponse
+from models.responses.responses_booking import AvailabilityResponse, AvailabilitySlot, BookAppointmentResponse
 
-__all__ = ('BookAppointmentResponse', 'ChatResponse')
+__all__ = ('AvailabilityResponse', 'AvailabilitySlot', 'BookAppointmentResponse', 'ChatResponse')
