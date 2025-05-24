@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from models.requests import BookAppointmentRequest
-from models.responses import BookAppointmentResponse
+from models.requests import AvailabilityRequest, BookAppointmentRequest, HeadsDownRequest
+from models.responses import AvailabilityResponse, AvailabilitySlot, BookAppointmentResponse, HeadsDownResponse
 from structlog import get_logger
 
 from src.calendar_booking_logic.booking_service import BookingService
@@ -41,3 +41,61 @@ async def post_book_appointment(payload: BookAppointmentRequest):
                                        conflict_info=booking_info['conflict_info'])
 
     return response
+
+
+@booking_router.post('/availability',
+                     response_model=AvailabilityResponse,
+                     summary="Find available time slots on the agent's calendar",
+                     description="Get time slot availability on the agents calendar")
+async def post_availability(payload: AvailabilityRequest):
+    try:
+        start_time_date = parse_datetime(payload.start_time)
+    except:
+        raise ValueError(f"Invalid start date time string {payload.start_time}")
+    try:
+        end_time_date = parse_datetime(payload.end_time)
+    except:
+        raise ValueError(f"Invalid end date time string {payload.end_time}")
+
+    agent = payload.agent_id
+    duration = payload.duration
+    slots = payload.max_slots
+
+    availability = booking_service.find_available_times(agent_id=agent,
+                                                        date_range_start=start_time_date,
+                                                        date_range_end=end_time_date,
+                                                        duration_minutes=duration,
+                                                        max_slots=slots)
+    list_of_slot_objects = [AvailabilitySlot(start=slot['start'], end=slot['end']) for slot in availability]
+
+    response = AvailabilityResponse(agent_id=agent,
+                                    available_slots=list_of_slot_objects)
+
+    return response
+
+
+@booking_router.post('/heads_down',
+                     response_model=HeadsDownResponse,
+                     summary="book a day of heads down focus time",
+                     description="find the day within the specified parameters and book focus time on your calendar")
+async def post_heads_down(payload: HeadsDownRequest):
+    try:
+        start_time_date = parse_datetime(payload.start_time)
+    except:
+        raise ValueError(f"Invalid start date time string {payload.start_time}")
+    try:
+        end_time_date = parse_datetime(payload.end_time)
+    except:
+        raise ValueError(f"Invalid end date time string {payload.end_time}")
+
+    agent = payload.agent_id
+    response = booking_service.book_heads_down_focus_block(agent_id=agent,
+                                                           date_range_start=start_time_date,
+                                                           date_range_end=end_time_date)
+
+    return HeadsDownResponse(agent_id=agent,
+                             day=response['day'],
+                             start=response['start'],
+                             end=response['end'],
+                             booking_info=response['booking_info'],
+                             conflict_info=response['conflict_info'])

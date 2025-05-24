@@ -1,5 +1,5 @@
 from models.requests.requests_agent import ChatRequest, ClientMessage
-from models.requests.requests_booking import BookAppointmentRequest
+from models.requests.requests_booking import AvailabilityRequest, BookAppointmentRequest, HeadsDownRequest
 
 
-__all__ = ('BookAppointmentRequest', 'ChatRequest', 'ClientMessage')
+__all__ = ('AvailabilityRequest', 'BookAppointmentRequest', 'ChatRequest', 'ClientMessage', 'HeadsDownRequest')
