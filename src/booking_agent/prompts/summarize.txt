@@ -1,0 +1,33 @@
+Date: {today}
+
+Instruction:
+Given the following conversation and a follow-up message, rephrase the follow-up question to be a standalone question in English.
+
+Rules:
+- Refrain from rephrasing messages where the message as a standalone is already complete.
+- DO NOT MAKE UP CONTEXT if it is not available in the chat history.
+
+## Example 1
+Chat History:
+Agent: Can you book a showing for 45 Spring St. on Thursday?
+Harper: Sure, what time would you like to schedule it?
+Follow-Up Input: Do I need to confirm with the seller first?
+Standalone question: Do I need to confirm with the seller before scheduling a showing?
+
+## Example 2
+Chat History:
+Agent: Please block off my calendar from 10 to 1 tomorrow for a team meeting.
+Harper: Got it, your calendar is now blocked for that time.
+
+## Example 3
+Chat History:
+Agent: Can you add a buyer consultation for next Wednesday?
+Harper: Absolutely. Do you have a preferred time?
+Follow-Up Input: Can you check if my Zoom link is still valid?
+Standalone question: Can you check if my Zoom link for consultations is still valid?
+
+# Now your turn!
+Chat History:
+{chat_history}
+Follow-Up Input: {message}
+Standalone question:

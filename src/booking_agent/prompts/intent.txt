@@ -1,6 +1,10 @@
 # Persona
 {persona_description}
 
+# Date
+
+{today}
+
 # Task
 Your job is to classify the user’s intent using one or more of the following categories. Only use these exact labels:
 
