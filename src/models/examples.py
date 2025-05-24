@@ -4,3 +4,10 @@ EXAMPLE_DURATION = 60
 EXAMPLE_TITLE = "Calendar Booking Service Demo"
 EXAMPLE_BOOKING_INFO = f"New Calendar event '{EXAMPLE_TITLE}' for agent '{EXAMPLE_AGENT}' created."
 EXAMPLE_CONFLICT_INFO = f"Conflict detected with event: {EXAMPLE_AGENT} - Busy Block at 2025-05-25T22:00:00+00:00–2025-05-25T22:30:00+00:00"
+EXAMPLE_UUID = "f8ae4631-2c46-400b-b7b7-55f5f0020080"
+EXAMPLE_ROLE = "user"
+EXAMPLE_CONTENT = "Schedule Tea at Noon next Wednesday"
+EXAMPLE_MESSAGE = {"role": EXAMPLE_ROLE, "content": EXAMPLE_CONTENT}
+EXAMPLE_CHAT_HISTORY = [
+    EXAMPLE_MESSAGE
+    ]

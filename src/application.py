@@ -9,7 +9,7 @@ from prometheus_client.multiprocess import MultiProcessCollector
 
 from models.base_models import ErrorResponse
 from prometheus_middleware import PrometheusMiddleware
-from routes import status_router, booking_router
+from routes import status_router, booking_router, agent_router
 
 HOST_ADDRESS = '0.0.0.0'
 HOST_PORT = 7100
@@ -30,6 +30,8 @@ application = FastAPI(
         openapi_url='/api/v1/openapi.json'
 )
 
+application.include_router(agent_router, responses={400: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
+                           tags=['Agent'])
 application.include_router(booking_router, responses={400: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
                            tags=['Booking'])
 application.include_router(status_router, responses={400: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
