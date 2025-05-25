@@ -18,7 +18,6 @@ class BookingService:
     agents = ["Alex", "Cynthia", "Daniel", "Luis"]
 
     def __init__(self):
-
         self.calendars = self._load_calendars()
 
     def _load_calendars(self) -> Dict[str, Dict]:
@@ -41,7 +40,7 @@ class BookingService:
                 "filepath": full_file_path
             }
 
-        logger.info(f"Loaded {len(calendars)} calendars for agents {" ".join(list(calendars.keys()))}")
+        logger.info(f"Loaded {len(calendars)} calendars for agents {' '.join(list(calendars.keys()))}")
 
         return calendars
 
@@ -63,12 +62,21 @@ class BookingService:
         event_response = {"conflict_info": "No Conflicts",
                           "booking_info": ""}
 
+        pdt_tz = pytz.timezone("US/Pacific")
+
         for event in calendar.events:
-            if pdt_start_time < event.end.datetime and end_time > event.begin.datetime:
-                conflict_message = f"Conflict detected with event: {event.name} at {event.begin}–{event.end}"
+            event_start = event.begin.datetime
+            event_end = event.end.datetime
+
+            if event_start.tzinfo is None or event_start.tzinfo.utcoffset(event_start) == timedelta(0):
+                event_start = event_start.replace(tzinfo=pytz.UTC).astimezone(pdt_tz)
+            if event_end.tzinfo is None or event_end.tzinfo.utcoffset(event_end) == timedelta(0):
+                event_end = event_end.replace(tzinfo=pytz.UTC).astimezone(pdt_tz)
+
+            if pdt_start_time < event_end and end_time > event_start:
+                conflict_message = f"Conflict detected with event: {event.name} at {event_start}–{event_end}"
                 logger.info(conflict_message)
                 event_response['conflict_info'] = conflict_message
-
                 break
 
         new_event = Event()
@@ -102,7 +110,6 @@ class BookingService:
         step = timedelta(minutes=30)
         current = pdt_date_range_start
 
-        # Convert all event ranges to a list of tuples for comparison
         busy_times = [(event.begin.datetime, event.end.datetime) for event in calendar.events]
 
         while current + timedelta(minutes=duration_minutes) <= pdt_date_range_end and len(slots) < max_slots:
@@ -118,6 +125,7 @@ class BookingService:
         logger.info(f"Found {len(slots)} time slots for agent {agent_id}: {slots}")
 
         return slots
+
 
     def book_heads_down_focus_block(self, agent_id: str, date_range_start: datetime,
                                     date_range_end: datetime) -> dict:

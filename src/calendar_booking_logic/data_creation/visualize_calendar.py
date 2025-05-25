@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 
 import pytz
 import matplotlib.pyplot as plt
+from calendar_booking_logic.common.constants import DATA_DIR
+from pathlib import Path
 
 
 def visualize_workday_schedule(file_path: str, start_date: datetime, num_days: int):
@@ -61,6 +63,6 @@ def visualize_workday_schedule(file_path: str, start_date: datetime, num_days: i
 if __name__ == "__main__":
     name = "Luis"
     start_date = datetime.today()
-    visualize_workday_schedule(f"./calendars/agent_{name}.ics",
+    visualize_workday_schedule(str(Path(DATA_DIR) / f"agent_{name}.ics"),
                                start_date=start_date,
                                num_days=7)

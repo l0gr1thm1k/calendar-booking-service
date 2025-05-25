@@ -5,7 +5,7 @@ Your task is to extract a JSON object from the user’s message with the followi
 - startTime: The earliest time to start finding availability (format: "YYYY-MM-DD h:mm AM/PM").
 - endTime: The latest time to find availability (format: "YYYY-MM-DD h:mm AM/PM").
 - duration: The length of each time slot in minutes. Default to 30 if not specified.
-- maxSlots: The maximum number of slots to return. Default to 3 if unspecified.
+- maxSlots: The maximum number of slots to return. Default to 5 if unspecified.
 
 Use the provided date: {today} to resolve vague references like "next Wednesday".
 
@@ -49,8 +49,8 @@ Output:
   "startTime": "2025-05-24 9:00 AM",
   "endTime": "2025-05-31 5:00 PM",
   "duration": 30,
-  "maxSlots": 3,
-  "reasoning": "Used provided agent ID 'Luis'. Assumed the current week (May 24–31). Duration stated. MaxSlots defaulted to 3."
+  "maxSlots": 5,
+  "reasoning": "Used provided agent ID 'Luis'. Assumed the current week (May 24–31). Duration stated. MaxSlots defaulted to 5."
 }}
 
 ### Example 4
@@ -63,8 +63,8 @@ Output:
   "startTime": "2025-05-26 9:00 AM",
   "endTime": "2025-05-27 12:00 PM",
   "duration": 30,
-  "maxSlots": 3,
-  "reasoning": "Used provided agent ID 'Luis'. 'Early next week' interpreted as Monday through Tuesday noon (May 26–27). 'Short meeting' assumed to be 30 minutes. MaxSlots defaulted to 3."
+  "maxSlots": 5,
+  "reasoning": "Used provided agent ID 'Luis'. 'Early next week' interpreted as Monday through Tuesday noon (May 26–27). 'Short meeting' assumed to be 30 minutes. MaxSlots defaulted to 5."
 }}
 
 ### Example 5
@@ -77,8 +77,36 @@ Output:
   "startTime": "2025-06-03 9:00 AM",
   "endTime": "2025-06-06 5:00 PM",
   "duration": 60,
-  "maxSlots": 3,
-  "reasoning": "Used provided agent ID 'Luis'. The user wants a meeting with Kai but not on Kai's calendar. Date range and duration are clear. MaxSlots defaulted to 3."
+  "maxSlots": 5,
+  "reasoning": "Used provided agent ID 'Luis'. The user wants a meeting with Kai but not on Kai's calendar. Date range and duration are clear. MaxSlots defaulted to 5."
+}}
+
+### Example 6
+Today's Date: 2025-05-24
+Agent ID: Luis
+User Message: When should I reconnect with my clients I haven’t spoken to recently?
+Output:
+{{
+  "agentId": "Luis",
+  "startTime": "2025-05-024 9:00 AM",
+  "endTime": "2025-05-31 5:00 PM",
+  "duration": 30,
+  "maxSlots": 5,
+  "reasoning": "Used provided agent ID 'Luis'. The user wants a meeting with Kai but not on Kai's calendar. Date range and duration are clear. MaxSlots defaulted to 5."
+}}
+
+## Example 7
+Today's Date: 2025-05-24
+Agent ID: Luis
+User Message: When am I free to do a showing this weekend?
+Output:
+{{
+  "agentId": "Luis",
+  "startTime": "2025-05-31 9:00 AM",
+  "endTime": "2025-06-01 5:00 PM",
+  "duration": 120,
+  "maxSlots": 5,
+  "reasoning": "User is asking for availability to do a showing on the Wekeend. Weekned is assumed to be from Saturday morning to Sunday Evening. Showing take more time so the duration is set to 120 minutes. MaxSlots defaulted 5."
 }}
 
 ### Now your turn:

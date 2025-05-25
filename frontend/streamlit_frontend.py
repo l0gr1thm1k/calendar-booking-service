@@ -4,8 +4,8 @@ import json
 import uuid
 
 
-#api_url = "http://0.0.0.0:7100/stream?protocol=json"
-api_url = "http://booking-service-api:7100/stream?protocol=json"
+api_url = "http://0.0.0.0:7100/stream?protocol=json"
+#api_url = "http://booking-service-api:7100/stream?protocol=json"
 
 
 st.set_page_config(page_title="HouseWhisper Booking Agent", layout="wide")
