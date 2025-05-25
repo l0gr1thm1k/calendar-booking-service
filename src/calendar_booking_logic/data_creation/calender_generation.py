@@ -1,12 +1,11 @@
 import os
-import uuid
 import random
-
-from ics import Calendar, Event
+import uuid
 from datetime import datetime, timedelta
-import pytz
-
 from pathlib import Path
+
+import pytz
+from ics import Calendar, Event
 from src.calendar_booking_logic.common.constants import DATA_DIR
 
 

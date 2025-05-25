@@ -5,9 +5,10 @@ from typing import Dict, List
 
 import pytz
 from ics import Calendar, Event
-from src.calendar_booking_logic.common.constants import DATA_DIR
-from src.calendar_booking_logic.common.utils import to_pdt
-from src.calendar_booking_logic.data_creation.calender_generation import create_randomized_week_calendar
+from calendar_booking_logic.common.constants import DATA_DIR, DEFAULT_AGENT_IDENTIFIER
+from calendar_booking_logic.common.utils import to_pdt
+from calendar_booking_logic.data_creation.calender_generation import create_randomized_week_calendar
+from calendar_booking_logic.data_creation.create_calendar_plot import create_workday_schedule_plot
 from structlog import get_logger
 
 logger = get_logger(__name__)
@@ -18,7 +19,6 @@ class BookingService:
     agents = ["Alex", "Cynthia", "Daniel", "Luis"]
 
     def __init__(self):
-
         self.calendars = self._load_calendars()
 
     def _load_calendars(self) -> Dict[str, Dict]:
@@ -41,7 +41,9 @@ class BookingService:
                 "filepath": full_file_path
             }
 
-        logger.info(f"Loaded {len(calendars)} calendars for agents {" ".join(list(calendars.keys()))}")
+        create_workday_schedule_plot(file_path=calendars[DEFAULT_AGENT_IDENTIFIER]["filepath"],
+                                     start_date=datetime.today())
+        logger.info(f"Loaded {len(calendars)} calendars for agents {' '.join(list(calendars.keys()))}")
 
         return calendars
 
@@ -63,12 +65,21 @@ class BookingService:
         event_response = {"conflict_info": "No Conflicts",
                           "booking_info": ""}
 
+        pdt_tz = pytz.timezone("US/Pacific")
+
         for event in calendar.events:
-            if pdt_start_time < event.end.datetime and end_time > event.begin.datetime:
-                conflict_message = f"Conflict detected with event: {event.name} at {event.begin}–{event.end}"
+            event_start = event.begin.datetime
+            event_end = event.end.datetime
+
+            if event_start.tzinfo is None or event_start.tzinfo.utcoffset(event_start) == timedelta(0):
+                event_start = event_start.replace(tzinfo=pytz.UTC).astimezone(pdt_tz)
+            if event_end.tzinfo is None or event_end.tzinfo.utcoffset(event_end) == timedelta(0):
+                event_end = event_end.replace(tzinfo=pytz.UTC).astimezone(pdt_tz)
+
+            if pdt_start_time < event_end and end_time > event_start:
+                conflict_message = f"Conflict detected with event: {event.name} at {event_start}–{event_end}"
                 logger.info(conflict_message)
                 event_response['conflict_info'] = conflict_message
-
                 break
 
         new_event = Event()
@@ -78,6 +89,8 @@ class BookingService:
         calendar.events.add(new_event)
 
         self.save_calendar_to_file(agent_id)
+        create_workday_schedule_plot(file_path=self.calendars[agent_id]["filepath"],
+                                     start_date=datetime.today())
         event_info_message = f"New Calendar event '{title}' for agent '{agent_id}' created."
         logger.info(event_info_message)
         event_response['booking_info'] = event_info_message
@@ -102,7 +115,6 @@ class BookingService:
         step = timedelta(minutes=30)
         current = pdt_date_range_start
 
-        # Convert all event ranges to a list of tuples for comparison
         busy_times = [(event.begin.datetime, event.end.datetime) for event in calendar.events]
 
         while current + timedelta(minutes=duration_minutes) <= pdt_date_range_end and len(slots) < max_slots:
@@ -127,19 +139,29 @@ class BookingService:
         calendar = self.calendars[agent_id]["calendar"]
 
         best_day = self._compute_day_with_least_meeting_time(calendar, date_range_start, date_range_end)
-
         if best_day is None:
             return self._no_focus_day_response(agent_id, reason="No available day found in range.")
 
-        free_blocks = self._get_free_blocks_for_day(calendar, best_day)
-
-        if not free_blocks:
+        all_blocks = self._get_free_blocks_for_day(calendar, best_day)
+        if not all_blocks:
             return self._no_focus_day_response(agent_id, day=best_day, reason="Best day is fully booked.")
 
-        # 🔁 Only use the longest continuous block of free time
-        focus_start, focus_end = self._get_longest_continuous_free_block(free_blocks)
+        # Flatten and filter only blocks that are within the requested date range
+        focus_blocks = []
+        for block_group in all_blocks:
+            for start, end in block_group:
+                if date_range_start <= start <= date_range_end and date_range_start <= end <= date_range_end:
+                    focus_blocks.append((start, end))
 
-        # 🧮 Count other meetings during work hours on this day
+        if not focus_blocks:
+            return self._no_focus_day_response(agent_id, day=best_day, reason="No valid free time in range.")
+
+        # Merge into a single event from earliest start to latest end
+        focus_start = min(start for start, _ in focus_blocks)
+        focus_end = max(end for _, end in focus_blocks)
+
+        self._create_focus_event(calendar, focus_start, focus_end, agent_id)
+
         meeting_count = sum(
             1 for e in calendar.events
             if e.name != "Focus Time"
@@ -148,9 +170,10 @@ class BookingService:
             and e.end.datetime.time() > time(9, 0)
         )
 
-        self._create_focus_event(calendar, focus_start, focus_end, agent_id)
-
         focus_hours = round((focus_end - focus_start).total_seconds() / 3600, 2)
+
+        create_workday_schedule_plot(file_path=self.calendars[agent_id]["filepath"],
+                                     start_date=datetime.today())
 
         return {
             "agent_id": agent_id,
@@ -164,7 +187,8 @@ class BookingService:
             "conflict_info": f"{meeting_count} other meetings were found on this day."
         }
 
-    def _compute_day_with_least_meeting_time(self, calendar, date_range_start, date_range_end):
+    @staticmethod
+    def _compute_day_with_least_meeting_time(calendar, date_range_start, date_range_end):
         tz = pytz.timezone("US/Pacific")
         best_day = None
         min_meeting_minutes = float('inf')

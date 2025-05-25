@@ -12,7 +12,8 @@ def get_booking_chain():
 
     async def _book(inputs: dict) -> dict:
         prompt_text = prompt.format(
-            message=inputs["message"]
+            message=inputs["message"],
+            chat_history=inputs["chat_history"],
         )
 
         result = await llm.ainvoke(prompt_text)
@@ -27,10 +28,10 @@ def get_booking_chain():
             }
 
         booking_response = await book_appointment(agent_name=parsed['agent_name'],
-                                            start_time=parsed['start_time'],
-                                            duration=parsed['duration_minutes'],
-                                            title=parsed['title'],
-                                            )
+                                                  start_time=parsed['start_time'],
+                                                  duration=parsed['duration_minutes'],
+                                                  title=parsed['title'],
+                                                  )
         return booking_response
 
     return RunnableLambda(_book)

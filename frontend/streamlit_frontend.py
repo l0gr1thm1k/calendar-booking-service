@@ -2,11 +2,22 @@ import streamlit as st
 import requests
 import json
 import uuid
+import re
+import os
+from pathlib import Path
+import streamlit.components.v1 as components
 
 
-#api_url = "http://0.0.0.0:7100/stream?protocol=json"
-api_url = "http://booking-service-api:7100/stream?protocol=json"
+def running_in_docker():
+    return os.path.exists('/.dockerenv')
 
+
+if running_in_docker():
+    url_base = "booking-service-api"
+else:
+    url_base = "0.0.0.0"
+
+api_url = f"http://{url_base}:7100/stream?protocol=json"
 
 st.set_page_config(page_title="HouseWhisper Booking Agent", layout="wide")
 
@@ -29,13 +40,15 @@ if "messages" not in st.session_state:
 # 💬 Chat Interface
 st.title("🤖 HouseWhisper Booking Agent")
 
+
 # Display messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 if prompt := st.chat_input("Ask about your calendar..."):
-    chat_history = "\n".join([msg["content"] for msg in st.session_state.messages[-4:]])  # Last 5 messages
+    session_id = str(uuid.uuid4())
+    chat_history = "\n".join([msg["content"] for msg in st.session_state.messages[-5:]])
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -48,13 +61,13 @@ if prompt := st.chat_input("Ask about your calendar..."):
         # Stream response
         messages_payload = [
             {"role": msg["role"], "content": msg["content"]}
-            for msg in st.session_state.messages[-4:]
+            for msg in st.session_state.messages[-5:]
         ]
         messages_payload.append({"role": "user", "content": prompt})
 
         payload = {
             "messages": messages_payload,
-            "id": str(uuid.uuid4())
+            "id": session_id
         }
 
         try:
@@ -67,13 +80,26 @@ if prompt := st.chat_input("Ask about your calendar..."):
 
             for line in response.iter_lines():
                 if line:
-                    data = json.loads(line.decode())  # ✅ now succeeds
+                    data = json.loads(line.decode())
                     token = data.get("response", "")
                     full_response += token
                     response_placeholder.markdown(full_response + "▌")
 
             response_placeholder.markdown(full_response)
             st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+            raw_html = Path("frontend/weekly_calendar.html").read_text()
+            resized_html = re.sub(
+                r'style="height:\d+px; width:100%;"',
+                'style="height:350px; width:600px;"',
+                raw_html
+            )
+            wrapped_html = f"""
+            <div style="width: 825px; height: 650px; margin: auto;">
+                {resized_html}
+            </div>
+            """
+            components.html(wrapped_html, height=650, scrolling=False)
 
         except Exception as e:
             st.error(f"API error: {str(e)}")

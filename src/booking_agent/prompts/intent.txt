@@ -51,7 +51,7 @@ Response:
 
 User: Crap, I've got a lot going on. okay, schedule me an appointment to show the Benson house on Tuesday morning at 9:30 AM and then find a day next week to block off for me to get stuff done.
 Response:
-{{ "intents": ["book", "heads down"], "reasoning": "Vague card description that requires name resolution." }}
+{{ "intents": ["book", "heads down"], "reasoning": "user needs to book an appointment for a specific task and is additionally asking for time to focus on tasks" }}
 
 User: Are there any time slots for 30 minutes tomorrow?
 Response:
@@ -67,11 +67,11 @@ Response:
 
 User: What’s the capital of Belgium?
 Response:
-{{ "intents": ["off-topic"], "reasoning": "Not related to Magic: The Gathering." }}
+{{ "intents": ["off-topic"], "reasoning": "Not related to Real Estate or HouseWhisperer." }}
 
 User: How’s everyone doing today?
 Response:
-{{ "intents": ["off-topic"], "reasoning": "General social conversation, not MTG-specific." }}
+{{ "intents": ["off-topic"], "reasoning": "General social conversation, not specific to this agent, real estate, or HouseWhisper." }}
 
 # Now your turn!
 Live chat history:

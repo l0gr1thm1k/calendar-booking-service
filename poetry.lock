@@ -1694,6 +1694,27 @@ typing = ["typing-extensions ; python_version < \"3.10\""]
 xmp = ["defusedxml"]
 
 [[package]]
+name = "plotly"
+version = "6.1.1"
+description = "An open-source interactive data visualization library for Python"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "plotly-6.1.1-py3-none-any.whl", hash = "sha256:9cca7167406ebf7ff541422738402159ec3621a608ff7b3e2f025573a1c76225"},
+    {file = "plotly-6.1.1.tar.gz", hash = "sha256:84a4f3d36655f1328fa3155377c7e8a9533196697d5b79a4bc5e905bdd09a433"},
+]
+
+[package.dependencies]
+narwhals = ">=1.15.1"
+packaging = "*"
+
+[package.extras]
+dev = ["black (==25.1.0)"]
+express = ["numpy"]
+kaleido = ["kaleido (==1.0.0rc13)"]
+
+[[package]]
 name = "prometheus-client"
 version = "0.21.0"
 description = "Python client for the Prometheus monitoring system."
@@ -3180,4 +3201,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "3.12.6"
-content-hash = "79b933728270b8cbeb129bc86221d8d37a27b26070d84f2b35420845ead071ec"
+content-hash = "faaf61b8ba1c256101657c634e47fb900ff46a1845742615d38d84b7aa5a9ec3"

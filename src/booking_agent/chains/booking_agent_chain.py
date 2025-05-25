@@ -62,30 +62,35 @@ def get_booking_agent_chain() -> RunnableLambda:
         summary = results["summary"]
 
         if misbehavior == "unsafe":
-            yield {
-                "type": "misbehavior_block",
-                "error": "Input flagged as unsafe."
-            }
+            async for chunk in stream_text_response(
+                    "That seems outside the realm of scheduling meetings for you via HouseWhisper. I'm best at helping you manage your schedule"
+            ):
+                yield chunk
+
+            return
 
         # Step 2: Short-circuit if off-topic
         if intents == ["off-topic"]:
-            yield {
-                "type": "off_topic",
-                "response": "That seems outside the realm of scheduling meetings for you via HouseWhisper. I'm best at helping you manage your schedule"
-            }
+            async for chunk in stream_text_response("That seems outside the realm of scheduling meetings for you via HouseWhisper. I'm best at helping you manage your schedule"
+                                                    ):
+                yield chunk
+
+            return
 
         logger.info(f"Intents identified: {intents}")
         # Step 3: Prepare and run context chains
         chains_to_run = {}
-        possible_intents = ['book', 'availability.txt', 'heads down']
         if 'book' in intents:
-            chains_to_run["book"] = booking_chain.ainvoke({"message": message})
+            chains_to_run["book"] = booking_chain.ainvoke({"message": summary,
+                                                           "chat_history": chat_history})
 
         if 'availability' in intents:
-            chains_to_run["availability"] = availability_chain.ainvoke({"message": message})
+            chains_to_run["availability"] = availability_chain.ainvoke({"message": summary,
+                                                                        "chat_history": chat_history})
 
         if 'heads down' in intents:
-            chains_to_run["heads down"] = heads_down_chain.ainvoke({"message": message})
+            chains_to_run["heads down"] = heads_down_chain.ainvoke({"message": summary,
+                                                                    "chat_history": chat_history})
 
         context = {
         }
@@ -98,7 +103,6 @@ def get_booking_agent_chain() -> RunnableLambda:
             booking_context = ''
 
         if 'availability' in context:
-            # availability_context = [str(slot) for slot in context['availability']['available_slots']]
             availability_context = format_available_slots(context['availability']['available_slots'])
         else:
             availability_context = ''
@@ -147,6 +151,12 @@ def format_available_slots(slots):
         for t in times:
             formatted.append(f"- {t}")
     return "\n".join(formatted)
+
+
+async def stream_text_response(text: str):
+    for ch in text:
+        yield ch
+        await asyncio.sleep(0.01)
 
 
 if __name__ == '__main__':
