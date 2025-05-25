@@ -3,10 +3,21 @@ import requests
 import json
 import uuid
 
+import os
+from pathlib import Path
+import streamlit.components.v1 as components
 
-api_url = "http://0.0.0.0:7100/stream?protocol=json"
-#api_url = "http://booking-service-api:7100/stream?protocol=json"
 
+def running_in_docker():
+    return os.path.exists('/.dockerenv')
+
+
+if running_in_docker():
+    url_base = "booking-service-api"
+else:
+    url_base = "0.0.0.0"
+
+api_url = f"http://{url_base}:7100/stream?protocol=json"
 
 st.set_page_config(page_title="HouseWhisper Booking Agent", layout="wide")
 
@@ -28,6 +39,34 @@ if "messages" not in st.session_state:
 
 # 💬 Chat Interface
 st.title("🤖 HouseWhisper Booking Agent")
+
+# 🗓️ Display embedded calendar HTML
+#calendar_html = Path("frontend/weekly_calendar.html").read_text()
+#components.html(calendar_html, height=600, scrolling=False)
+raw_html = Path("frontend/weekly_calendar.html").read_text()
+import re
+resized_html = re.sub(
+    r'style="height:\d+px; width:100%;"',
+    'style="height:350px; width:600px;"',
+    raw_html
+)
+
+# Wrap and embed
+wrapped_html = f"""
+<div style="width: 825px; height: 650px; margin: auto;">
+    {resized_html}
+</div>
+"""
+
+raw_html = Path("frontend/weekly_calendar.html").read_text()
+styled_html = f"""
+<div style="width: 825px; height: 650px; overflow: hidden; margin: auto;">
+    {raw_html}
+</div>
+"""
+
+#components.html(styled_html, height=650, scrolling=False)
+
 
 # Display messages
 for message in st.session_state.messages:
@@ -74,6 +113,19 @@ if prompt := st.chat_input("Ask about your calendar..."):
 
             response_placeholder.markdown(full_response)
             st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+            raw_html = Path("frontend/weekly_calendar.html").read_text()
+            resized_html = re.sub(
+                r'style="height:\d+px; width:100%;"',
+                'style="height:350px; width:600px;"',
+                raw_html
+            )
+            wrapped_html = f"""
+            <div style="width: 825px; height: 650px; margin: auto;">
+                {resized_html}
+            </div>
+            """
+            components.html(wrapped_html, height=650, scrolling=False)
 
         except Exception as e:
             st.error(f"API error: {str(e)}")

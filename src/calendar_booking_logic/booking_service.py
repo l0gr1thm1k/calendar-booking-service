@@ -5,9 +5,10 @@ from typing import Dict, List
 
 import pytz
 from ics import Calendar, Event
-from src.calendar_booking_logic.common.constants import DATA_DIR
-from src.calendar_booking_logic.common.utils import to_pdt
-from src.calendar_booking_logic.data_creation.calender_generation import create_randomized_week_calendar
+from calendar_booking_logic.common.constants import DATA_DIR, DEFAULT_AGENT_IDENTIFIER
+from calendar_booking_logic.common.utils import to_pdt
+from calendar_booking_logic.data_creation.calender_generation import create_randomized_week_calendar
+from calendar_booking_logic.data_creation.create_calendar_plot import create_workday_schedule_plot
 from structlog import get_logger
 
 logger = get_logger(__name__)
@@ -40,6 +41,8 @@ class BookingService:
                 "filepath": full_file_path
             }
 
+        create_workday_schedule_plot(file_path=calendars[DEFAULT_AGENT_IDENTIFIER]["filepath"],
+                                     start_date=datetime.today())
         logger.info(f"Loaded {len(calendars)} calendars for agents {' '.join(list(calendars.keys()))}")
 
         return calendars
@@ -86,6 +89,8 @@ class BookingService:
         calendar.events.add(new_event)
 
         self.save_calendar_to_file(agent_id)
+        create_workday_schedule_plot(file_path=self.calendars[agent_id]["filepath"],
+                                     start_date=datetime.today())
         event_info_message = f"New Calendar event '{title}' for agent '{agent_id}' created."
         logger.info(event_info_message)
         event_response['booking_info'] = event_info_message
@@ -126,7 +131,6 @@ class BookingService:
 
         return slots
 
-
     def book_heads_down_focus_block(self, agent_id: str, date_range_start: datetime,
                                     date_range_end: datetime) -> dict:
         if agent_id not in self.calendars:
@@ -160,6 +164,9 @@ class BookingService:
 
         focus_hours = round((focus_end - focus_start).total_seconds() / 3600, 2)
 
+        create_workday_schedule_plot(file_path=self.calendars[agent_id]["filepath"],
+                                     start_date=datetime.today())
+
         return {
             "agent_id": agent_id,
             "day": best_day.strftime('%Y-%m-%d'),
@@ -172,7 +179,8 @@ class BookingService:
             "conflict_info": f"{meeting_count} other meetings were found on this day."
         }
 
-    def _compute_day_with_least_meeting_time(self, calendar, date_range_start, date_range_end):
+    @staticmethod
+    def _compute_day_with_least_meeting_time(calendar, date_range_start, date_range_end):
         tz = pytz.timezone("US/Pacific")
         best_day = None
         min_meeting_minutes = float('inf')
