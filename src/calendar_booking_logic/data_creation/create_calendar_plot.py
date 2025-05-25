@@ -48,13 +48,19 @@ def create_workday_schedule_plot(file_path: str, start_date: datetime, num_days:
     fig = go.Figure()
 
     for event in events:
+        if 'Busy' in event['name']:
+            color = 'tomato'
+        elif 'Focus Time' in event['name']:
+            color = 'lightgreen'
+        else:
+            color = 'lightblue'
         fig.add_trace(go.Bar(
             x=[event["day"]],
             y=[event["end_decimal"] - event["start_decimal"]],
             base=event["start_decimal"],
             name=event["name"],
             orientation='v',
-            marker=dict(color='tomato' if "Busy" in event["name"] else 'lightblue'),
+            marker=dict(color=color),
             width=0.7,
             hovertemplate=f"{event['name']}<br>{event['start'].strftime('%H:%M')}–{event['end'].strftime('%H:%M')}"
         ))

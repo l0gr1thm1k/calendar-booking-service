@@ -139,19 +139,29 @@ class BookingService:
         calendar = self.calendars[agent_id]["calendar"]
 
         best_day = self._compute_day_with_least_meeting_time(calendar, date_range_start, date_range_end)
-
         if best_day is None:
             return self._no_focus_day_response(agent_id, reason="No available day found in range.")
 
-        free_blocks = self._get_free_blocks_for_day(calendar, best_day)
-
-        if not free_blocks:
+        all_blocks = self._get_free_blocks_for_day(calendar, best_day)
+        if not all_blocks:
             return self._no_focus_day_response(agent_id, day=best_day, reason="Best day is fully booked.")
 
-        # 🔁 Only use the longest continuous block of free time
-        focus_start, focus_end = self._get_longest_continuous_free_block(free_blocks)
+        # Flatten and filter only blocks that are within the requested date range
+        focus_blocks = []
+        for block_group in all_blocks:
+            for start, end in block_group:
+                if date_range_start <= start <= date_range_end and date_range_start <= end <= date_range_end:
+                    focus_blocks.append((start, end))
 
-        # 🧮 Count other meetings during work hours on this day
+        if not focus_blocks:
+            return self._no_focus_day_response(agent_id, day=best_day, reason="No valid free time in range.")
+
+        # Merge into a single event from earliest start to latest end
+        focus_start = min(start for start, _ in focus_blocks)
+        focus_end = max(end for _, end in focus_blocks)
+
+        self._create_focus_event(calendar, focus_start, focus_end, agent_id)
+
         meeting_count = sum(
             1 for e in calendar.events
             if e.name != "Focus Time"
@@ -159,8 +169,6 @@ class BookingService:
             and e.begin.datetime.time() < time(17, 0)
             and e.end.datetime.time() > time(9, 0)
         )
-
-        self._create_focus_event(calendar, focus_start, focus_end, agent_id)
 
         focus_hours = round((focus_end - focus_start).total_seconds() / 3600, 2)
 
