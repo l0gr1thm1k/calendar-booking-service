@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import plotly.graph_objects as go
@@ -13,8 +13,10 @@ def create_workday_schedule_plot(file_path: str, start_date: datetime, num_days:
     with open(file_path, "r") as f:
         calendar = Calendar(f.read())
 
-    full_day_labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    active_days = full_day_labels[:num_days]
+    # Generate day labels starting from start_date
+    day_dates = [(start_date + timedelta(days=i)) for i in range(num_days)]
+    active_day_labels = [d.strftime("%a %m/%d") for d in day_dates]
+
     events = []
 
     for event in calendar.events:
@@ -29,15 +31,16 @@ def create_workday_schedule_plot(file_path: str, start_date: datetime, num_days:
         start_decimal = max(9, start.hour + start.minute / 60)
         end_decimal = min(17, end.hour + end.minute / 60)
 
-        day_index = start.weekday()
-        if day_index >= num_days:
+        # Only include events within the active date range
+        event_date_label = start.strftime("%a %m/%d")
+        if event_date_label not in active_day_labels:
             continue
 
         events.append({
             "name": event.name,
             "start": start,
             "end": end,
-            "day": full_day_labels[day_index],
+            "day": event_date_label,
             "start_decimal": start_decimal,
             "end_decimal": end_decimal,
         })
@@ -51,7 +54,7 @@ def create_workday_schedule_plot(file_path: str, start_date: datetime, num_days:
             base=event["start_decimal"],
             name=event["name"],
             orientation='v',
-            marker=dict(color='tomato' if "Busy" in event["name"] else 'lightgray'),
+            marker=dict(color='tomato' if "Busy" in event["name"] else 'lightblue'),
             width=0.7,
             hovertemplate=f"{event['name']}<br>{event['start'].strftime('%H:%M')}–{event['end'].strftime('%H:%M')}"
         ))
@@ -63,14 +66,14 @@ def create_workday_schedule_plot(file_path: str, start_date: datetime, num_days:
         xaxis=dict(
             title='Day of Week',
             categoryorder='array',
-            categoryarray=active_days,
+            categoryarray=active_day_labels,
         ),
         height=600,
         margin=dict(l=60, r=60, t=60, b=60),
         showlegend=False
     )
-    output_path_html = str(Path(FRONTEND_DIR) / "weekly_calendar.html")
 
+    output_path_html = str(Path(FRONTEND_DIR) / "weekly_calendar.html")
     fig.write_html(output_path_html, include_plotlyjs="cdn")
 
 

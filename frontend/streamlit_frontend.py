@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import json
 import uuid
-
+import re
 import os
 from pathlib import Path
 import streamlit.components.v1 as components
@@ -40,33 +40,6 @@ if "messages" not in st.session_state:
 # 💬 Chat Interface
 st.title("🤖 HouseWhisper Booking Agent")
 
-# 🗓️ Display embedded calendar HTML
-#calendar_html = Path("frontend/weekly_calendar.html").read_text()
-#components.html(calendar_html, height=600, scrolling=False)
-raw_html = Path("frontend/weekly_calendar.html").read_text()
-import re
-resized_html = re.sub(
-    r'style="height:\d+px; width:100%;"',
-    'style="height:350px; width:600px;"',
-    raw_html
-)
-
-# Wrap and embed
-wrapped_html = f"""
-<div style="width: 825px; height: 650px; margin: auto;">
-    {resized_html}
-</div>
-"""
-
-raw_html = Path("frontend/weekly_calendar.html").read_text()
-styled_html = f"""
-<div style="width: 825px; height: 650px; overflow: hidden; margin: auto;">
-    {raw_html}
-</div>
-"""
-
-#components.html(styled_html, height=650, scrolling=False)
-
 
 # Display messages
 for message in st.session_state.messages:
@@ -74,7 +47,8 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 if prompt := st.chat_input("Ask about your calendar..."):
-    chat_history = "\n".join([msg["content"] for msg in st.session_state.messages[-4:]])  # Last 5 messages
+    session_id = str(uuid.uuid4())
+    chat_history = "\n".join([msg["content"] for msg in st.session_state.messages[-5:]])
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -87,13 +61,13 @@ if prompt := st.chat_input("Ask about your calendar..."):
         # Stream response
         messages_payload = [
             {"role": msg["role"], "content": msg["content"]}
-            for msg in st.session_state.messages[-4:]
+            for msg in st.session_state.messages[-5:]
         ]
         messages_payload.append({"role": "user", "content": prompt})
 
         payload = {
             "messages": messages_payload,
-            "id": str(uuid.uuid4())
+            "id": session_id
         }
 
         try:
@@ -106,7 +80,7 @@ if prompt := st.chat_input("Ask about your calendar..."):
 
             for line in response.iter_lines():
                 if line:
-                    data = json.loads(line.decode())  # ✅ now succeeds
+                    data = json.loads(line.decode())
                     token = data.get("response", "")
                     full_response += token
                     response_placeholder.markdown(full_response + "▌")

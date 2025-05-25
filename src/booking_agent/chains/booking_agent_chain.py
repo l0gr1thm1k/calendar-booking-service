@@ -81,13 +81,13 @@ def get_booking_agent_chain() -> RunnableLambda:
         # Step 3: Prepare and run context chains
         chains_to_run = {}
         if 'book' in intents:
-            chains_to_run["book"] = booking_chain.ainvoke({"message": message})
+            chains_to_run["book"] = booking_chain.ainvoke({"message": summary})
 
         if 'availability' in intents:
-            chains_to_run["availability"] = availability_chain.ainvoke({"message": message})
+            chains_to_run["availability"] = availability_chain.ainvoke({"message": summary})
 
         if 'heads down' in intents:
-            chains_to_run["heads down"] = heads_down_chain.ainvoke({"message": message})
+            chains_to_run["heads down"] = heads_down_chain.ainvoke({"message": summary})
 
         context = {
         }
