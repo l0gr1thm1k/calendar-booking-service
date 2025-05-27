@@ -12,7 +12,8 @@ def get_heads_down_chain():
 
     async def _book(inputs: dict) -> dict:
         prompt_text = prompt.format(
-            message=inputs["message"]
+            message=inputs["message"],
+            chat_history=inputs["chat_history"],
         )
 
         result = await llm.ainvoke(prompt_text)

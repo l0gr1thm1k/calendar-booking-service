@@ -3,9 +3,10 @@ from models.requests import AvailabilityRequest, BookAppointmentRequest, HeadsDo
 from models.responses import AvailabilityResponse, AvailabilitySlot, BookAppointmentResponse, HeadsDownResponse
 from structlog import get_logger
 
-from src.calendar_booking_logic.booking_service import BookingService
-from src.calendar_booking_logic.common.utils import parse_datetime
+from calendar_booking_logic.booking_service import BookingService
+from calendar_booking_logic.common.utils import parse_datetime
 from routes.router import CustomRoute
+
 
 logger = get_logger()
 booking_router = APIRouter(route_class=CustomRoute)
@@ -99,3 +100,10 @@ async def post_heads_down(payload: HeadsDownRequest):
                              end=response['end'],
                              booking_info=response['booking_info'],
                              conflict_info=response['conflict_info'])
+
+
+@booking_router.get('/randomize_calendars')
+def get_randomize_calendars():
+    booking_service._generate_new_calendars()
+
+    return {"message": "Calendars randomized"}

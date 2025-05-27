@@ -18,7 +18,10 @@ class BookingService:
     data_dir = DATA_DIR
     agents = ["Alex", "Cynthia", "Daniel", "Luis"]
 
+
     def __init__(self):
+        if DEFAULT_AGENT_IDENTIFIER not in self.agents:
+            self.agents.append(DEFAULT_AGENT_IDENTIFIER)
         self.calendars = self._load_calendars()
 
     def _load_calendars(self) -> Dict[str, Dict]:
@@ -52,6 +55,10 @@ class BookingService:
         for name in self.agents:
             calendar_path = str(Path(DATA_DIR) / f"agent_{name}.ics")
             create_randomized_week_calendar(calendar_path, start_date, name)
+        create_workday_schedule_plot(file_path=str(Path(DATA_DIR) / f'agent_{DEFAULT_AGENT_IDENTIFIER}.ics'),
+                                     start_date=start_date,
+                                     num_days=7,
+                                     )
 
     def book_appointment(self, agent_id: str, start_time: datetime, duration_minutes: int,
                          title: str = "Appointment") -> dict:
