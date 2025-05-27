@@ -87,8 +87,9 @@ if prompt := st.chat_input("Ask about your calendar..."):
 
             response_placeholder.markdown(full_response)
             st.session_state.messages.append({"role": "assistant", "content": full_response})
-
-            raw_html = Path("frontend/weekly_calendar.html").read_text()
+            html_path = Path(__file__).parent.parent / 'shared_mount/weekly_calendar.html'
+            raw_html = html_path.read_text()
+            #raw_html = Path("frontend/weekly_calendar.html").read_text()
             resized_html = re.sub(
                 r'style="height:\d+px; width:100%;"',
                 'style="height:350px; width:600px;"',

@@ -7,6 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATA_DIR = str(Path(__file__).parent.parent / 'data')
-FRONTEND_DIR = str(Path(__file__).parent.parent.parent.parent / 'frontend')
+SHARED_MOUNT_DIR = str(Path(__file__).parent.parent.parent.parent / 'shared_mount')
 PDT = pytz.timezone("US/Pacific")
 DEFAULT_AGENT_IDENTIFIER = os.getenv('DEFAULT_AGENT_IDENTIFIER')

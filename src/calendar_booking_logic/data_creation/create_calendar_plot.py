@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import pytz
 from ics import Calendar
 
-from calendar_booking_logic.common.constants import DATA_DIR, FRONTEND_DIR
+from calendar_booking_logic.common.constants import DATA_DIR, SHARED_MOUNT_DIR
 
 
 def create_workday_schedule_plot(file_path: str, start_date: datetime, num_days: int = 7):
@@ -79,7 +79,7 @@ def create_workday_schedule_plot(file_path: str, start_date: datetime, num_days:
         showlegend=False
     )
 
-    output_path_html = str(Path(FRONTEND_DIR) / "weekly_calendar.html")
+    output_path_html = str(Path(SHARED_MOUNT_DIR) / "weekly_calendar.html")
     fig.write_html(output_path_html, include_plotlyjs="cdn")
 
 
