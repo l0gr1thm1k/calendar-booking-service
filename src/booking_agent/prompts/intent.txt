@@ -8,11 +8,12 @@
 # Task
 Your job is to classify the user’s intent using one or more of the following categories. Only use these exact labels:
 
-- "book": the user has requested you to book an appointment for them
-- "availability": the user has asked about for some availability slots on their calendar
-- "heads down", the user has asked you to block off time on their calendar for focused work
+- "book": the user has explicitly asked you to schedule an appointment on their calendar
+- "availability": the user has asked about when they are available or free to perform a task, or is asking for guidance about when might be a good time to act
+- "heads down": the user has asked you to block off time on their calendar for focused work
 - "off-topic": questions or topics clearly unrelated to HouseWhisper and real estate (e.g., personal life, tech support, current events)
 
+Only use "book" if the user clearly wants a calendar event created. If the message is vague or exploratory (e.g. “When should I…” or “What’s a good time to…”), classify it as "availability" unless a booking action is clearly stated.
 Only use "off-topic" if the message is clearly and definitively unrelated to appointment scheduling or real estate.
 
 # Output
@@ -33,11 +34,15 @@ User: What are some times I'm able to show the house on Saturday?
 Response:
 {{ "intents": ["availability"], "reasoning": "User is looking to understand when they are available to do a task" }}
 
+User: When am I available to do a showing this weekend?
+Response:
+{{ "intents": ["availability"], "reasoning": "User is asking broadly about their open availability for a task" }}
+
 User: Will I have an open slot on Monday to meet with Craig? if I am open, book me for 2pm
 Response:
 {{ "intents": ["book", "availability"], "reasoning": "This involves a request to know when they are available and to schedule a meeting if they are available at a specific time." }}
 
-User: What is the day i'm least busy? block that off for me so i can get some work done
+User: What is the day I'm least busy? Block that off for me so I can get some work done
 Response:
 {{ "intents": ["heads down"], "reasoning": "User wants to know when they have time to focus and want's that time blocked off" }}
 
@@ -47,19 +52,19 @@ Response:
 
 User: Uma wants me to look at some updates for the house before showing. When can I sync with her?
 Response:
-{{ "intents": ["availability"], "reasoning": "User is asking for when they are available to do a task." }}
+{{ "intents": ["availability"], "reasoning": "User is asking about their available times to meet, not yet requesting a specific meeting to be scheduled." }}
 
-User: Crap, I've got a lot going on. okay, schedule me an appointment to show the Benson house on Tuesday morning at 9:30 AM and then find a day next week to block off for me to get stuff done.
+User: Crap, I've got a lot going on. Okay, schedule me an appointment to show the Benson house on Tuesday morning at 9:30 AM and then find a day next week to block off for me to get stuff done.
 Response:
-{{ "intents": ["book", "heads down"], "reasoning": "user needs to book an appointment for a specific task and is additionally asking for time to focus on tasks" }}
+{{ "intents": ["book", "heads down"], "reasoning": "User needs to book an appointment for a specific task and is additionally asking for time to focus on tasks" }}
 
 User: Are there any time slots for 30 minutes tomorrow?
 Response:
 {{ "intents": ["availability"], "reasoning": "User is asking for time slots by duration" }}
 
-User: What should I look to follow up with the Smith's on their offers?
+User: When should I reconnect with my clients I haven’t spoken to recently?
 Response:
-{{ "intents": ["availability"], "reasoning": "User is looking for time slots to do a task" }}
+{{ "intents": ["availability"], "reasoning": "User is asking a general question about when might be a good time to perform a task, not asking for a specific booking." }}
 
 User: Schedule me a meeting to meet with Mike from Rocket Mortgage Thursday at 4pm for 1 hour and 45 minutes
 Response:
