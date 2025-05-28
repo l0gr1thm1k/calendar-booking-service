@@ -53,7 +53,7 @@ def create_workday_schedule_plot(file_path: str, start_date: datetime, num_days:
         elif 'Focus Time' in event['name']:
             color = 'lightgreen'
         else:
-            color = 'lightblue'
+            color = 'blue'
         fig.add_trace(go.Bar(
             x=[event["day"]],
             y=[event["end_decimal"] - event["start_decimal"]],

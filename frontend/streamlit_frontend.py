@@ -69,6 +69,7 @@ with st.sidebar:
      - [ ] Expand heads down chain
      - [ ] Handle multiple booking requests
      - [ ] Handle multi-intent user requests
+     - [ ] Add ability to modify appointments
      """)
 
 # Display messages

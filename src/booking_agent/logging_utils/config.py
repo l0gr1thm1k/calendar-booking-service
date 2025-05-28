@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
         },
     },
     "loggers": {
-        "gameplay_assistant": {
+        "calendar_booking_agent": {
             "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,
