@@ -40,6 +40,36 @@ if "messages" not in st.session_state:
 # 💬 Chat Interface
 st.title("🤖 HouseWhisper Booking Agent")
 
+# 📁 Sidebar for Chat & Calendar Control
+with st.sidebar:
+    st.header("⚙️ Controls")
+
+    # Clear Chat History
+    if st.button("🧹 Clear Chat History"):
+        st.session_state.messages = []
+        st.rerun()
+
+    # Reset Calendars Button
+    if st.button("🔄 Reset Calendars"):
+        try:
+            reset_url = f"http://{url_base}:7100/randomize_calendars"
+            response = requests.get(reset_url)
+            if response.status_code == 200:
+                st.success("Calendars successfully reset.")
+            else:
+                st.error(f"Failed to reset calendars. Status: {response.status_code}")
+        except Exception as e:
+            st.error(f"Error resetting calendars: {str(e)}")
+
+    st.markdown("---")
+    st.subheader("📝 TODO")
+    st.markdown("""
+     - [ ] Add additional intents
+     - [ ] Enrich response context
+     - [ ] Expand heads down chain
+     - [ ] Handle multiple booking requests
+     - [ ] Handle multi-intent user requests
+     """)
 
 # Display messages
 for message in st.session_state.messages:

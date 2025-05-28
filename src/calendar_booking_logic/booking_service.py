@@ -18,15 +18,14 @@ class BookingService:
     data_dir = DATA_DIR
     agents = ["Alex", "Cynthia", "Daniel", "Luis"]
 
-
     def __init__(self):
         if DEFAULT_AGENT_IDENTIFIER not in self.agents:
             self.agents.append(DEFAULT_AGENT_IDENTIFIER)
-        self.calendars = self._load_calendars()
+        self._set_calendars()
 
-    def _load_calendars(self) -> Dict[str, Dict]:
+    def _set_calendars(self) -> None:
         self._generate_new_calendars()
-        calendars = {}
+        self.calendars = {}
         for calendar_file_path in os.listdir(self.data_dir):
             if not calendar_file_path.endswith(".ics"):
                 continue  # Skip non-ICS files
@@ -38,17 +37,16 @@ class BookingService:
             with open(full_file_path, "r") as f:
                 calendar = Calendar(f.read())
 
-            calendars[agent_name] = {
+            self.calendars[agent_name] = {
                 "agent": agent_name,
                 "calendar": calendar,
                 "filepath": full_file_path
             }
 
-        create_workday_schedule_plot(file_path=calendars[DEFAULT_AGENT_IDENTIFIER]["filepath"],
+        create_workday_schedule_plot(file_path=self.calendars[DEFAULT_AGENT_IDENTIFIER]["filepath"],
                                      start_date=datetime.today())
-        logger.info(f"Loaded {len(calendars)} calendars for agents {' '.join(list(calendars.keys()))}")
+        logger.info(f"Loaded {len(self.calendars)} calendars for agents {' '.join(list(self.calendars.keys()))}")
 
-        return calendars
 
     def _generate_new_calendars(self):
         start_date = datetime.today()

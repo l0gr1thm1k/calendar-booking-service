@@ -104,6 +104,6 @@ async def post_heads_down(payload: HeadsDownRequest):
 
 @booking_router.get('/randomize_calendars')
 def get_randomize_calendars():
-    booking_service._generate_new_calendars()
+    booking_service._set_calendars()
 
     return {"message": "Calendars randomized"}
